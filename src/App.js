@@ -19,7 +19,7 @@ const GoogleMap = () => {
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
   const markerCountRef = useRef(0);
-  let markerCluster;
+  const markerClusterRef = useRef(null);
 
   useEffect(() => {
     const loadGoogleMaps = () => {
@@ -55,7 +55,7 @@ const GoogleMap = () => {
     });
     setMap(newMap);
 
-    markerCluster = new MarkerClusterer(newMap, [], {
+    markerClusterRef.current = new MarkerClusterer(newMap, [], {
       imagePath:
         "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m",
     });
@@ -67,7 +67,7 @@ const GoogleMap = () => {
     addMarker(initialLat, initialLng, true);
   };
 
-  const addMarker = (lat, lng, isFirstMarker) => {
+  const addMarker = (lat, lng, isFirstMarker = false) => {
     const label = isFirstMarker ? "0" : (++markerCountRef.current).toString();
     const marker = new window.google.maps.Marker({
       position: { lat, lng },
@@ -76,8 +76,11 @@ const GoogleMap = () => {
       draggable: true,
     });
 
-    setMarkers((prevMarkers) => [...prevMarkers, marker]);
-    markerCluster.addMarker(marker);
+    setMarkers((prevMarkers) => {
+      const newMarkers = [...prevMarkers, marker];
+      markerClusterRef.current.addMarker(marker);
+      return newMarkers;
+    });
 
     addFirebaseRecord(lat, lng);
   };
@@ -97,22 +100,27 @@ const GoogleMap = () => {
   };
 
   const removeLastMarker = () => {
-    if (markers.length > 0) {
-      const lastMarker = markers[markers.length - 1];
+    setMarkers((prevMarkers) => {
+      if (prevMarkers.length === 0) return prevMarkers;
+
+      const lastMarker = prevMarkers[prevMarkers.length - 1];
       lastMarker.setMap(null);
-      markerCluster.removeMarker(lastMarker);
-      setMarkers((prevMarkers) => prevMarkers.slice(0, -1));
+      markerClusterRef.current.removeMarker(lastMarker);
+
       markerCountRef.current--;
-    }
+      return prevMarkers.slice(0, -1);
+    });
   };
 
   const removeAllMarkers = () => {
-    markers.forEach((marker) => {
-      marker.setMap(null);
-      markerCluster.removeMarker(marker);
+    setMarkers((prevMarkers) => {
+      prevMarkers.forEach((marker) => {
+        marker.setMap(null);
+        markerClusterRef.current.removeMarker(marker);
+      });
+      markerCountRef.current = 0;
+      return [];
     });
-    setMarkers([]);
-    markerCountRef.current = 0;
   };
 
   return (
