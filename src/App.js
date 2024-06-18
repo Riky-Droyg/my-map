@@ -10,8 +10,7 @@ const firebaseConfig = {
   storageBucket: "my-map-93787.appspot.com",
   messagingSenderId: "1019716733017",
   appId: "1:1019716733017:web:e7db3bfa146cdd681dc948",
-  measurementId: "G-CJH5KV0PCM"
-};
+  measurementId: "G-CJH5KV0PCM"};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -24,7 +23,7 @@ const GoogleMap = () => {
   useEffect(() => {
     const loadGoogleMaps = () => {
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=$AIzaSyBEGBs39UiY2Qljl5ImE3rJAGcu_o-S0MQ&callback=initMap`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${firebaseConfig.apiKey}&callback=initMap`;
       script.async = true;
       script.defer = true;
       script.onload = initMap;
