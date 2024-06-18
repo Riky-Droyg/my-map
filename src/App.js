@@ -10,7 +10,8 @@ const firebaseConfig = {
   storageBucket: "my-map-93787.appspot.com",
   messagingSenderId: "1019716733017",
   appId: "1:1019716733017:web:e7db3bfa146cdd681dc948",
-  measurementId: "G-CJH5KV0PCM"};
+  measurementId: "G-CJH5KV0PCM"
+};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -75,7 +76,7 @@ const GoogleMap = () => {
       draggable: true,
     });
 
-    setMarkers([...markers, marker]);
+    setMarkers((prevMarkers) => [...prevMarkers, marker]);
     markerCluster.addMarker(marker);
 
     addFirebaseRecord(lat, lng);
@@ -99,13 +100,17 @@ const GoogleMap = () => {
     if (markers.length > 0) {
       const lastMarker = markers[markers.length - 1];
       lastMarker.setMap(null);
-      setMarkers(markers.slice(0, -1));
+      markerCluster.removeMarker(lastMarker);
+      setMarkers((prevMarkers) => prevMarkers.slice(0, -1));
       markerCountRef.current--;
     }
   };
 
   const removeAllMarkers = () => {
-    markers.forEach((marker) => marker.setMap(null));
+    markers.forEach((marker) => {
+      marker.setMap(null);
+      markerCluster.removeMarker(marker);
+    });
     setMarkers([]);
     markerCountRef.current = 0;
   };
